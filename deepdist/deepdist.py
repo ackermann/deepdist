@@ -1,16 +1,15 @@
 import copy
-import cPickle as pickle
+import _pickle as pickle
 try:
     import cloudpickle as pickleDumper
 except:
-    import cPickle as pickleDumper
+    import _pickle as pickleDumper
 from multiprocessing import Process
-from rwlock import RWLock
+from deepdist.rwlock import RWLock
 import socket
 import sys
 from threading import Thread
-import urllib2
-import urlparse
+import urllib
 
 """Lightning-Fast Deep Learning on Spark
 """
@@ -39,7 +38,7 @@ class DeepDist:
 
     def __exit__(self, type, value, traceback):
         url = "http://%s/shutdown" % self.master
-        response = urllib2.urlopen(url, '{}').read()
+        response = urllib.urlopen(url, '{}').read()
         print("Exit requested...")
 
     def start(self):
@@ -104,7 +103,7 @@ class DeepDist:
             func()
             return 'Server shutting down...'
             
-        print 'Listening to 0.0.0.0:5000...'
+        print('Listening to 0.0.0.0:5000...')
         app.run(host='0.0.0.0', debug=True, threaded=True, use_reloader=False)
 
     def train(self, rdd, gradient, descent):
@@ -115,10 +114,10 @@ class DeepDist:
             master = 'localhost:5000'
         else:
             if master.startswith('spark://'):
-                master = '%s:5000' % urlparse.urlparse(master).netloc.split(':')[0]
+                master = '%s:5000' % urllib.parse(master).netloc.split(':')[0]
             else:
                 master = '%s:5000' % master.split(':')[0]
-        print '\n*** Master: %s\n' % master
+        print('\n*** Master: %s\n' % master)
 
         self.descent = descent
         
@@ -128,13 +127,13 @@ class DeepDist:
         return rdd.mapPartitions(mapPartitions).collect()
 
 def fetch_model(master='localhost:5000'):
-    request = urllib2.Request('http://%s/model' % master,
+    request = urllib.Request('http://%s/model' % master,
         headers={'Content-Type': 'application/deepdist'})
-    return pickle.loads(urllib2.urlopen(request).read())
+    return pickle.loads(urllib.urlopen(request).read())
 
 def send_gradient(gradient, master='localhost:5000'):
     if not gradient:
           return 'EMPTY'
-    request = urllib2.Request('http://%s/update' % master, pickleDumper.dumps(gradient, -1),
+    request = urllib.Request('http://%s/update' % master, pickleDumper.dumps(gradient, -1),
         headers={'Content-Type': 'application/deepdist'})
-    return urllib2.urlopen(request).read()
+    return urllib.urlopen(request).read()
