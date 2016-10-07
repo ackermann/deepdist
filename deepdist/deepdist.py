@@ -127,13 +127,13 @@ class DeepDist:
         return rdd.mapPartitions(mapPartitions).collect()
 
 def fetch_model(master='localhost:5000'):
-    request = urllib.Request('http://%s/model' % master,
+    request = urllib.request.Request('http://%s/model' % master,
         headers={'Content-Type': 'application/deepdist'})
     return pickle.loads(urllib.request.urlopen(request).read())
 
 def send_gradient(gradient, master='localhost:5000'):
     if not gradient:
           return 'EMPTY'
-    request = urllib.Request('http://%s/update' % master, pickleDumper.dumps(gradient, -1),
+    request = urllib.request.Request('http://%s/update' % master, pickleDumper.dumps(gradient, -1),
         headers={'Content-Type': 'application/deepdist'})
     return urllib.request.urlopen(request).read()
