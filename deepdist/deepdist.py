@@ -38,7 +38,7 @@ class DeepDist:
 
     def __exit__(self, type, value, traceback):
         url = "http://%s/shutdown" % self.master
-        response = urllib.urlopen(url, '{}').read()
+        response = urllib.request.urlopen(url, '{}').read()
         print("Exit requested...")
 
     def start(self):
@@ -129,11 +129,11 @@ class DeepDist:
 def fetch_model(master='localhost:5000'):
     request = urllib.Request('http://%s/model' % master,
         headers={'Content-Type': 'application/deepdist'})
-    return pickle.loads(urllib.urlopen(request).read())
+    return pickle.loads(urllib.request.urlopen(request).read())
 
 def send_gradient(gradient, master='localhost:5000'):
     if not gradient:
           return 'EMPTY'
     request = urllib.Request('http://%s/update' % master, pickleDumper.dumps(gradient, -1),
         headers={'Content-Type': 'application/deepdist'})
-    return urllib.urlopen(request).read()
+    return urllib.request.urlopen(request).read()
